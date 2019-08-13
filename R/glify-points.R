@@ -48,51 +48,16 @@
 #' }
 #'
 #' @export addGlPoints
-addGlPoints = function(map,
-                       data,
-                       color = cbind(0, 0.2, 1),
-                       opacity = 1,
-                       weight = 10,
-                       group = "glpoints",
-                       popup = NULL,
-                       ...) {
+addGlPoints = function(map, lng = NULL, lat = NULL, layerId = NULL, group = NULL, data = leaflet::getMapData(map)) {
+  pts <- leaflet::derivePoints(data, lng, lat, missing(lng), missing(lat), "addGlPoints")
 
-  if (is.null(group)) group = deparse(substitute(data))
-  if (inherits(data, "Spatial")) data <- sf::st_as_sf(data)
-  stopifnot(inherits(sf::st_geometry(data), c("sfc_POINT", "sfc_MULTIPOINT")))
-
-  # data
-  data = sf::st_transform(data, 4326)
-  crds = sf::st_coordinates(data)[, c(2, 1)]
-
-  # color
-  if (ncol(color) != 3) stop("only 3 column color matrix supported so far")
-  color = as.data.frame(color, stringsAsFactors = FALSE)
-  colnames(color) = c("r", "g", "b")
-
-  # color = jsonlite::toJSON(color)
-  color = jsonify::to_json(color)
-  # popup
-  if (!is.null(popup)) {
-    # popup = jsonlite::toJSON(data[[popup]])
-    popup = jsonify::to_json(data[[popup]])
-  } else {
-    popup = NULL
-  }
-
-  # convert data to json
-  # data = jsonlite::toJSON(crds, digits = 7)
-  data = jsonify::to_json(crds, ...)
-
-  # dependencies
   map$dependencies = c(
     map$dependencies,
     glifyDependencies()
   )
 
-  leaflet::invokeMethod(map, leaflet::getMapData(map), 'addGlifyPoints',
-                        data, color, popup, opacity, weight, group)
-
+  leaflet::invokeMethod(map, data, 'addGlifyPoints', pts$lat, pts$lng, layerId, group) %>%
+    leaflet::expandLimits(pts$lat, pts$lng)
 }
 
 ### via src
