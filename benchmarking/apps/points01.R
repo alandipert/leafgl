@@ -4,7 +4,7 @@ library(leafgl)
 library(sf)
 library(shiny)
 
-n <- 1e4
+n <- 1e6
 df1 <- data.frame(id = 1:n, x = rnorm(n, 10, 3), y = rnorm(n, 49, 1.8))
 pts <- st_as_sf(df1, coords = c("x", "y"), crs = 4326)
 
@@ -25,4 +25,18 @@ server <- function(input, output, session) {
   output$map <- renderLeaflet(m)
 }
 
-shinyApp(ui, server, options = list(port = 8028))
+host <- "127.0.0.1"
+port <- 5656
+
+args <- commandArgs(trailingOnly=TRUE)
+
+if (length(args) == 1) {
+  port <- as.numeric(args[[1]])
+} else if (length(args) == 2) {
+  host <- args[[1]]
+  port <- as.numeric(args[[2]])
+} else {
+  stop("Missing host/port")
+}
+
+shinyApp(ui, server, options = list(host = host, port = port))
