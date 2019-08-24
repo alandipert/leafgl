@@ -9,7 +9,7 @@ fileBytes <- function(con) {
   readBin(con, "raw", n = file.size(con))
 }
 
-timeUntilLoaded <- function(myloop, url, expectedScreenshot) {
+timeUntilLoaded <- function(privateLoop, url, expectedScreenshot) {
   expectedBytes <- fileBytes(expectedScreenshot)
   startTime <- Sys.time()
   b <- ChromoteSession$new()
@@ -18,8 +18,8 @@ timeUntilLoaded <- function(myloop, url, expectedScreenshot) {
   takeScreenshot <- function() {
     cat(".")
     tf <- tempfile()
+    on.exit(unlink(tf))
     screenshot <- b$screenshot(tf)
-    on.exit(unlink(screenshot))
     newBytes <- fileBytes(screenshot)
     if (identical(newBytes, expectedBytes)) {
       # TODO figure out the right way to shutdown without seeing weird websocket messages
@@ -27,7 +27,7 @@ timeUntilLoaded <- function(myloop, url, expectedScreenshot) {
       b$parent$stop()
       cat("\nDone in ", Sys.time()-startTime, "\n")
     } else {
-      later(takeScreenshot, delay = 0, loop = myloop)
+      later(takeScreenshot, delay = 0, loop = privateLoop)
     }
   }
   takeScreenshot()
