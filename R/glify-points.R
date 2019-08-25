@@ -48,7 +48,7 @@
 #' }
 #'
 #' @export addGlPoints
-addGlPoints = function(map, lng = NULL, lat = NULL, layerId = NULL, group = NULL, data = leaflet::getMapData(map)) {
+addGlPoints = function(map, lng = NULL, lat = NULL, layerId = NULL, color = "#03F", group = NULL, data = leaflet::getMapData(map)) {
   pts <- leaflet::derivePoints(data, lng, lat, missing(lng), missing(lat), "addGlPoints")
 
   map$dependencies = c(
@@ -56,7 +56,7 @@ addGlPoints = function(map, lng = NULL, lat = NULL, layerId = NULL, group = NULL
     glifyDependencies()
   )
 
-  leaflet::invokeMethod(map, data, 'addGlifyPoints', pts$lat, pts$lng, layerId, group) %>%
+  leaflet::invokeMethod(map, data, 'addGlifyPoints', pts$lat, pts$lng, layerId, serializeColor(color), group) %>%
     leaflet::expandLimits(pts$lat, pts$lng)
 }
 

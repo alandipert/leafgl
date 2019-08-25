@@ -1,5 +1,6 @@
-LeafletWidget.methods.addGlifyPoints = function(lat, lng, layerId, group) {
+LeafletWidget.methods.addGlifyPoints = function(lat, lng, layerId, color, group) {
 
+  console.log(color)
   if(!($.isEmptyObject(lat) || $.isEmptyObject(lng)) ||
       ($.isNumeric(lat) && $.isNumeric(lng))) {
 
@@ -17,7 +18,8 @@ LeafletWidget.methods.addGlifyPoints = function(lat, lng, layerId, group) {
         console.log("click", e, lat, lng, x, y);
       },
       data: points,
-      size: 10
+      size: 10,
+      color: color
     });
 
     this.layerManager.addLayer(pointsLayer.glLayer, null, null, group);
