@@ -1,4 +1,3 @@
-library(mapview)
 library(leaflet)
 library(leafgl)
 library(sf)
@@ -20,10 +19,8 @@ server <- function(input, output, session) {
   m <- leaflet() %>%
          addProviderTiles(provider = providers$CartoDB.DarkMatter) %>%
          addGlPoints(data = pts) %>%
-         addMouseCoordinates() %>%
          setView(lng = 10.5, lat = 49.5, zoom = 6) %>%
          addLayersControl(overlayGroups = "pts")
-
   output$map <- renderLeaflet(m)
 }
 
