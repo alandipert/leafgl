@@ -4,6 +4,8 @@ library(leafgl)
 library(sf)
 library(shiny)
 
+set.seed(51)
+
 n <- 1e6
 df1 <- data.frame(id = 1:n, x = rnorm(n, 10, 3), y = rnorm(n, 49, 1.8))
 pts <- st_as_sf(df1, coords = c("x", "y"), crs = 4326)
