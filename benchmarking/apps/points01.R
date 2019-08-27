@@ -10,8 +10,6 @@ df1 <- data.frame(id = 1:n, x = rnorm(n, 10, 3), y = rnorm(n, 49, 1.8))
 pts <- st_as_sf(df1, coords = c("x", "y"), crs = 4326)
 
 ui <- fluidPage(
-  # https://stackoverflow.com/a/36471739/3998203
-  tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
   leafglOutput('map')
 )
 
