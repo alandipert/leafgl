@@ -1,6 +1,5 @@
 LeafletWidget.methods.addGlifyPoints = function(lat, lng, layerId, color, group) {
 
-  console.log(color)
   if(!($.isEmptyObject(lat) || $.isEmptyObject(lng)) ||
       ($.isNumeric(lat) && $.isNumeric(lng))) {
 
