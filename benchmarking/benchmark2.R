@@ -30,10 +30,11 @@ timeUntilReady <- function(url, mapId = 'map') {
 
 # TODO Should be able to specify a timeout and exit 1 if exceeded
 main <- function(args, quitOnDone = TRUE) {
-  if (length(args) != 1) stop("URL argument is required")
+  if (length(args) != 2) stop("URL and map id arguments are required")
   url <- args[[1]]
+  mapId <- args[[2]]
 
-  timeUntilReady(url) %...>% {
+  timeUntilReady(url, mapId) %...>% {
     cat(., "\n")
     # TODO figure out a way to clean up session without emitting websocketpp
     # garbage message
