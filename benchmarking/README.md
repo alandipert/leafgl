@@ -4,11 +4,9 @@ This directory contains example applications and code for conducting Leaflet and
 
 ## Measurement methodology
 
-Our methodology is simple: given a test app, we load up the app and take a screenshot of it (the "reference" screenshot) after rendering has completed. This is done manually on an app-by-app and developer-by-developer basis.
+Our methodology is simple: given a test app, we load up the app and determine how long it takes for a child to appear in the DOM element containing the Leaflet map. Experimentation has shown that this moment corresponds to when WebGL-rendered graphics appear on the page.
 
-Then, we load the app again, continuously screenshotting it and marking the time the screenshot was taken. When the latest screenshot matches the reference screenshot, we know the data has been rendered. The time elapsed is our measurement.
-
-This is all done using [chromote][chromote], an R package that allows driving a browser and doing this kind of thing with R code.
+This is done using [chromote][chromote], an R package that allows driving a browser and doing this kind of thing with R code.
 
 ## Measurement caveats
 
@@ -38,37 +36,18 @@ Alternatively, you can run it from R with the [`processx`][processx] package lik
     app <- process$new("Rscript", c("benchmarking/apps/points01.R", "8028"))
     
 Either way, you should be able to see the app by visiting http://localhost:8028.
-
-### Take a reference screenshot
-
-Next we need to take a reference screenshot using chromote.
-
-> Note: If you're on Linux, you needn't install Google Chrome. You can get away with chromium (the `chromium-browser` package on Ubuntu). However, you might need to run this snippet before proceeding: `Sys.setenv(CHROMOTE_CHROME="/usr/bin/chromium-browser")`. See the [chromote docs](https://github.com/rstudio/chromote#specifying-which-browser-to-use) for details.
-
-First, make a chromote instance:
-
-    b <- chromote::ChromoteSession$new()
-    b$Page$navigate("http://localhost:8028")
-    
-See what chromote sees by running this:
-
-    b$view()
-    
-> Note: `b$view()` might not work if you're using Firefox, or if you're using RStudio Pro. As an alternative you can just wait for awhile until you think the app is probably done, and take a screenshot. If the screenshot doesn't show rendering completed, wait longer and take another one.
-    
-When the app has completed rendering, take a screenshot:
-
-    b$screenshot("reference.png")
     
 ### Perform a measurement
 
-Now that you have a reference image, you can use the `benchmark.R` tool to measure rendering time.
+You can use the `benchmark.R` tool to measure rendering time.
 
 > Note: Before proceeding, you should close any unneeded applications to free up memory and CPU cycles on your machine. Activity during the test might skew your results.
 
-    Rscript ./benchmark.R http://localhost:8028 reference.png
+    Rscript ./benchmark.R http://localhost:8028 map
     
-Dots should be printed while it's working, and then it should print "Done" with an elapsed time. That's your measurement.
+`map` here should correspond to the id you use for your `leafglOutput()` in your Shiny app.
+    
+Your measurement will appear in seconds and the program will exit.
 
 [chromote]: https://github.com/rstudio/chromote 
 [processx]: https://github.com/r-lib/processx
