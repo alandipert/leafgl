@@ -56,7 +56,7 @@ addGlPoints = function(map, lng = NULL, lat = NULL, layerId = NULL, color = "#03
     glifyDependencies()
   )
 
-  leaflet::invokeMethod(map, data, 'addGlifyPoints', pts$lat, pts$lng, layerId, serializeColor(color), group) %>%
+  leaflet::invokeMethod(map, data, 'addGlifyPoints', jsonify::to_json(pts$lat), jsonify::to_json(pts$lng), layerId, serializeColor(color), group) %>%
     leaflet::expandLimits(pts$lat, pts$lng)
 }
 
