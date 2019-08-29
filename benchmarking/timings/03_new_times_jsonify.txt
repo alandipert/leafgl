@@ -1,0 +1,11 @@
+# Times for alandipert/leafgl@6ae3201 using jsonify::to_json for pts$lat and pts$lng
+7.458239 
+6.799509 
+7.322877 
+7.288826 
+7.447795 
+7.38908 
+7.393123 
+7.268272 
+7.432893 
+7.067752 

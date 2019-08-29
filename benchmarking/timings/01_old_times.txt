@@ -1,0 +1,11 @@
+# Times in seconds for 1e6 points with the original leafgl code 01d01f8
+6.202679 
+5.663378 
+5.154885 
+5.417274 
+5.434123 
+5.240615 
+5.376848 
+5.388965 
+5.366899 
+5.414838 
