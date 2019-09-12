@@ -73,7 +73,7 @@ addGlPolygons <- function(map, lng = NULL, lat = NULL, layerId = NULL, group = N
   # If we fast-track sf objects, at least reduce them to lat/lng before converting
   #geojson <- polygonsGeoJSON(pgons)
   # Only reason passing data: if they are formula, then evaluated in context of data
-  leaflet::invokeMethod(map, data, 'addGlifyPolygons', jsonify::to_json(pgons, unbox = TRUE), NULL, NULL, NULL, group) %>%
+  leaflet::invokeMethod(map, data, 'addGlifyPolygons', jsonify::to_json(pgons, unbox = TRUE, by = "column"), NULL, NULL, NULL, group) %>%
     leaflet::expandLimitsBbox(pgons)
   # popup argument just needs to be passed to client
 }

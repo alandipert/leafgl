@@ -29,8 +29,7 @@ server <- function(input, output, session) {
   cat("Finished loading data\n")
   m <- leaflet() %>%
     addProviderTiles(provider = providers$CartoDB.DarkMatter) %>%
-    addGlPolygons(data = data$data, color = data$cols, popup = "fclass") %>%
-    setView(lng = 8.3, lat = 46.85, zoom = 9)
+    addGlPolygons(data = data$data)
   cat("Built map\n")
   output$map <- renderLeaflet(m)
 }
