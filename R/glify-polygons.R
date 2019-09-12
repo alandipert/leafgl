@@ -1,3 +1,39 @@
+simpleCoords <- function(df) {
+  cat('[')
+  for(i in seq_len(nrow(df))) {
+    cat('[', df[i,'lng'], ',', df[i, 'lat'], ']', sep = '')
+    if (i < nrow(df)) cat(',', sep = '')
+  }
+  cat(']')
+}
+
+# a list of compound polygons
+# a compound polygon is a list of simple polygons
+# a simple polygon is a dataframe with 2 columns
+polygonsGeoJSON <- function(pgons) {
+  structure(
+    R.utils::captureOutput({
+      cat('{"type":"GeometryCollection","geometries":[')
+      for (i in seq_along(pgons)) {
+        compound <- pgons[[i]]
+        cat('{"type":"MultiPolygon", "coordinates":[')
+        for (j in seq_along(compound)) {
+          simple <- compound[[j]]
+          for (x in seq_along(simple)) {
+            simpleCoords(simple[[x]])
+            if (x < length(simple)) cat(',')
+          }
+          if (j < length(compound)) cat(',')
+        }
+        cat(']}')
+        if (i < length(pgons)) cat(',')
+      }
+      cat(']}')
+    }),
+    class = "json"
+  )
+}
+
 #' add polygons to a leaflet map using Leaflet.glify
 #'
 #' @details
@@ -28,49 +64,63 @@
 #' @describeIn addGlPoints add polygons to a leaflet map using Leaflet.glify
 #' @aliases addGlPolygons
 #' @export addGlPolygons
-addGlPolygons = function(map,
-                         data,
-                         color = cbind(0, 0.2, 1),
-                         opacity = 0.6,
-                         group = "glpolygons",
-                         popup = NULL,
-                         ...) {
-
-  if (is.null(group)) group = deparse(substitute(data))
-  if (inherits(data, "Spatial")) data <- sf::st_as_sf(data)
-  stopifnot(inherits(sf::st_geometry(data), c("sfc_POLYGON", "sfc_MULTIPOLYGON")))
-  if (inherits(sf::st_geometry(data), "sfc_MULTIPOLYGON"))
-    stop("Can only handle POLYGONs, please cast your MULTIPOLYGON to POLYGON using sf::st_cast",
-         call. = FALSE)
-
-  # data
-  if (is.null(popup)) {
-    geom = sf::st_transform(sf::st_geometry(data), crs = 4326)
-    data = sf::st_sf(id = 1:length(geom), geometry = geom)
-  } else {
-    data = sf::st_transform(data[, popup], crs = 4326)
-  }
-
-  data = geojsonsf::sf_geojson(data, ...)
-
-  # color
-  if (ncol(color) != 3) stop("only 3 column color matrix supported so far")
-  color = as.data.frame(color, stringsAsFactors = FALSE)
-  colnames(color) = c("r", "g", "b")
-
-  # cols = jsonlite::toJSON(color)
-  cols = jsonify::to_json(color, digits = 3)
-
-  # dependencies
-  map$dependencies = c(
-    map$dependencies,
-    glifyDependencies()
-  )
-
-  leaflet::invokeMethod(map, leaflet::getMapData(map), 'addGlifyPolygons',
-                        data, cols, popup, opacity, group)
-
+addGlPolygons <- function(map, lng = NULL, lat = NULL, layerId = NULL, group = NULL,
+                          popup = NULL,
+                          data = leaflet::getMapData(map)) {
+  pgons <- derivePolygons(data, lng, lat, missing(lng), missing(lat), "addGlPolygons")
+  # Need to write derivePolygons -> geojson converter
+  # TODO strategy is necessary here for handling non-sf data
+  # If we fast-track sf objects, at least reduce them to lat/lng before converting
+  #geojson <- polygonsGeoJSON(pgons)
+  # Only reason passing data: if they are formula, then evaluated in context of data
+  leaflet::invokeMethod(map, data, 'addGlifyPolygons', jsonify::to_json(pgons, unbox = TRUE), NULL, NULL, NULL, group) %>%
+    leaflet::expandLimitsBbox(pgons)
+  # popup argument just needs to be passed to client
 }
+
+#addGlPolygons = function(map,
+#                         data,
+#                         color = cbind(0, 0.2, 1),
+#                         opacity = 0.6,
+#                         group = "glpolygons",
+#                         popup = NULL,
+#                         ...) {
+#
+#  if (is.null(group)) group = deparse(substitute(data))
+#  if (inherits(data, "Spatial")) data <- sf::st_as_sf(data)
+#  stopifnot(inherits(sf::st_geometry(data), c("sfc_POLYGON", "sfc_MULTIPOLYGON")))
+#  if (inherits(sf::st_geometry(data), "sfc_MULTIPOLYGON"))
+#    stop("Can only handle POLYGONs, please cast your MULTIPOLYGON to POLYGON using sf::st_cast",
+#         call. = FALSE)
+#
+#  # data
+#  if (is.null(popup)) {
+#    geom = sf::st_transform(sf::st_geometry(data), crs = 4326)
+#    data = sf::st_sf(id = 1:length(geom), geometry = geom)
+#  } else {
+#    data = sf::st_transform(data[, popup], crs = 4326)
+#  }
+#
+#  data = geojsonsf::sf_geojson(data, ...)
+#
+#  # color
+#  if (ncol(color) != 3) stop("only 3 column color matrix supported so far")
+#  color = as.data.frame(color, stringsAsFactors = FALSE)
+#  colnames(color) = c("r", "g", "b")
+#
+#  # cols = jsonlite::toJSON(color)
+#  cols = jsonify::to_json(color, digits = 3)
+#
+#  # dependencies
+#  map$dependencies = c(
+#    map$dependencies,
+#    glifyDependencies()
+#  )
+#
+#  leaflet::invokeMethod(map, leaflet::getMapData(map), 'addGlifyPolygons',
+#                        data, cols, popup, opacity, group)
+#
+#}
 
 
 ### via src
