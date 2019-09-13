@@ -1,39 +1,3 @@
-simpleCoords <- function(df) {
-  cat('[')
-  for(i in seq_len(nrow(df))) {
-    cat('[', df[i,'lng'], ',', df[i, 'lat'], ']', sep = '')
-    if (i < nrow(df)) cat(',', sep = '')
-  }
-  cat(']')
-}
-
-# a list of compound polygons
-# a compound polygon is a list of simple polygons
-# a simple polygon is a dataframe with 2 columns
-polygonsGeoJSON <- function(pgons) {
-  structure(
-    R.utils::captureOutput({
-      cat('{"type":"GeometryCollection","geometries":[')
-      for (i in seq_along(pgons)) {
-        compound <- pgons[[i]]
-        cat('{"type":"MultiPolygon", "coordinates":[')
-        for (j in seq_along(compound)) {
-          simple <- compound[[j]]
-          for (x in seq_along(simple)) {
-            simpleCoords(simple[[x]])
-            if (x < length(simple)) cat(',')
-          }
-          if (j < length(compound)) cat(',')
-        }
-        cat(']}')
-        if (i < length(pgons)) cat(',')
-      }
-      cat(']}')
-    }),
-    class = "json"
-  )
-}
-
 #' add polygons to a leaflet map using Leaflet.glify
 #'
 #' @details
@@ -73,7 +37,7 @@ addGlPolygons <- function(map, lng = NULL, lat = NULL, layerId = NULL, group = N
   # If we fast-track sf objects, at least reduce them to lat/lng before converting
   #geojson <- polygonsGeoJSON(pgons)
   # Only reason passing data: if they are formula, then evaluated in context of data
-  leaflet::invokeMethod(map, data, 'addGlifyPolygons', jsonify::to_json(pgons, unbox = TRUE, by = "column"), NULL, NULL, NULL, group) %>%
+  leaflet::invokeMethod(map, data, 'addGlifyPolygons', jsonify::to_json(pgons, unbox = TRUE, by = "column"), NULL, popup, NULL, group) %>%
     leaflet::expandLimitsBbox(pgons)
   # popup argument just needs to be passed to client
 }
